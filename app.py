@@ -1,35 +1,17 @@
-import streamlit as st
 import torch
 from diffusers import DiffusionPipeline
 
-st.set_page_config(page_title="Anime Generator", layout="centered")
+model_id = "stabilityai/stable-diffusion-xl-base-1.0"
 
-st.title("🎨 Anime Image Generator (Z-Anime)")
+pipe = DiffusionPipeline.from_pretrained(
+    model_id,
+    torch_dtype=torch.float16
+).to("cuda")
 
-@st.cache_resource
-def load_model():
-    model_id = "SeeSee21/Z-Anime"
+prompt = input("Enter your prompt to generate an image: ")
 
-    pipe = DiffusionPipeline.from_pretrained(
-        model_id,
-        torch_dtype=torch.float16
-    )
+image = pipe(prompt).images[0]
 
-    # use GPU if available
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    pipe = pipe.to(device)
+image.save("result.png")
 
-    return pipe
-
-pipe = load_model()
-
-prompt = st.text_area(
-    "Enter your prompt:",
-    "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k"
-)
-
-if st.button("Generate Image"):
-    with st.spinner("Generating..."):
-        image = pipe(prompt).images[0]
-
-    st.image(image, caption="Generated Anime Image", use_column_width=True)
+print("Image generated and saved as result.png")
