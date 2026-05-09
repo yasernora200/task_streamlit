@@ -1,17 +1,40 @@
+import streamlit as st
 import torch
 from diffusers import DiffusionPipeline
 
-model_id = "stabilityai/stable-diffusion-xl-base-1.0"
+st.set_page_config(page_title="Text to Image (SDXL)", layout="centered")
 
-pipe = DiffusionPipeline.from_pretrained(
-    model_id,
-    torch_dtype=torch.float16
-).to("cuda")
+st.title("🎨 Text to Image Generator")
+st.write("Write a prompt and AI will generate an image")
 
-prompt = input("Enter your prompt to generate an image: ")
+@st.cache_resource
+def load_model():
+    model_id = "stabilityai/stable-diffusion-xl-base-1.0"
 
-image = pipe(prompt).images[0]
+    pipe = DiffusionPipeline.from_pretrained(
+        model_id,
+        torch_dtype=torch.float16
+    )
 
-image.save("result.png")
+    pipe = pipe.to("cuda")
+    return pipe
 
-print("Image generated and saved as result.png")
+pipe = load_model()
+
+prompt = st.text_area("Enter your prompt", "Astronaut in a jungle, cinematic lighting, ultra detailed")
+
+steps = st.slider("Inference Steps", 10, 50, 30)
+guidance = st.slider("Guidance Scale", 1.0, 10.0, 7.5)
+
+if st.button("Generate Image"):
+    with st.spinner("Generating image..."):
+        image = pipe(
+            prompt,
+            num_inference_steps=steps,
+            guidance_scale=guidance
+        ).images[0]
+
+    st.image(image, caption="Generated Image", use_container_width=True)
+
+    image.save("result.png")
+    st.success("Saved as result.png")
