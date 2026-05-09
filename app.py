@@ -1,49 +1,19 @@
-# import streamlit as st
-# from transformers import pipeline
-
-# # تحميل موديل تحليل المشاعر
-# pipe = pipeline(
-#     "text-classification",
-#     model="cardiffnlp/twitter-roberta-base-sentiment"
-# )
-
-
-# st.title("Hello, Streamlit!")
-
-# text = st.text_input("Enter some text to analyze its sentiment:")
-
-
-# if text:
-#     result = pipe(text)
-
-#     st.write("Sentiment Analysis Result:")
-#     st.write(result[0]['label'])
-#     st.write(f"Confidence: {result[0]['score']:.2f}")
-
-
-
 import streamlit as st
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+from transformers import pipeline
 
-tokenizer = AutoTokenizer.from_pretrained(
-    "MK-Mostafa/marian-finetuned-translation-ar-to-en"
-)
+# تحميل موديل تحليل المشاعر
+pipe = pipeline("text-classification", model="tabularisai/multilingual-sentiment-analysis")
 
-model = AutoModelForSeq2SeqLM.from_pretrained(
-    "MK-Mostafa/marian-finetuned-translation-ar-to-en"
-)
 
-st.title("Arabic to English Translator")
+st.title("Hello, Streamlit!")
 
-text = st.text_area("Enter Arabic text")
+text = st.text_input("Enter some text to analyze its sentiment:")
+
 
 if text:
-    inputs = tokenizer(text, return_tensors="pt")
-    outputs = model.generate(**inputs)
+    result = pipe(text)
 
-    translation = tokenizer.decode(
-        outputs[0],
-        skip_special_tokens=True
-    )
+    st.write("Sentiment Analysis Result:")
+    st.write(result[0]['label'])
+    st.write(f"Confidence: {result[0]['score']:.2f}")
 
-    st.success(translation)
